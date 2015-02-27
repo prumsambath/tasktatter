@@ -8,6 +8,8 @@ gem 'coffee-rails', '~> 4.1.0'
 gem 'jquery-rails'
 gem 'sdoc', '~> 0.4.0', group: :doc
 
+gem 'devise'
+
 group :development do
   gem 'sqlite3'
 end
