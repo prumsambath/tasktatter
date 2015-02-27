@@ -87,4 +87,13 @@ RSpec.describe UsersController, type: :controller do
       it { respond_with 422 }
     end
   end
+
+  describe 'DELETE #destroy' do
+    before :each do
+      user = create(:user)
+      delete :destroy, id: user.id
+    end
+
+    it { should respond_with 204 }
+  end
 end
