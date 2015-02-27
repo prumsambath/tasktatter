@@ -51,4 +51,40 @@ RSpec.describe UsersController, type: :controller do
       it { respond_with 422 }
     end
   end
+
+  describe 'PATCH #update' do
+    context 'when is successfully updated' do
+      before :each do
+        @user = create(:user)
+        @new_email = 'newemail@example.com'
+        patch :update, { id: @user.id, user: { email: @new_email } }
+      end
+
+      it 'renders the json representation of the updated user' do
+        user_response = JSON.parse(response.body, symbolize_names: true)
+        expect(user_response[:email]).to eq(@new_email)
+      end
+
+      it { should respond_with 200 }
+    end
+
+    context 'when is not updated' do
+      before :each do
+        @user = create(:user)
+        patch :update, { id: @user.id, user: { email: 'bademail.com' } }
+      end
+
+      it 'renders an errors json' do
+        user_response = JSON.parse(response.body, symbolize_names: true)
+        expect(user_response).to have_key(:errors)
+      end
+
+      it 'renders the json errors' do
+        user_response = JSON.parse(response.body, symbolize_names: true)
+        expect(user_response[:errors][:email]).to include('is invalid')
+      end
+
+      it { respond_with 422 }
+    end
+  end
 end
