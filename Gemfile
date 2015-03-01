@@ -25,5 +25,6 @@ end
 group :test do
   gem 'faker'
   gem 'shoulda-matchers'
+  gem 'pry'
 end
 

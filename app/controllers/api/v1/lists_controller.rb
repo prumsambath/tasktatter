@@ -2,6 +2,6 @@ class Api::V1::ListsController < ApplicationController
   respond_to :json
 
   def index
-    render json: List.all, status: 200
+    render json: current_user.lists, status: 200
   end
 end
