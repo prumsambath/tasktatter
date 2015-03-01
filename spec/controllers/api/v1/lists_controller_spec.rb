@@ -19,4 +19,21 @@ describe Api::V1::ListsController do
 
     it { should respond_with 200 }
   end
+
+  describe 'GET #show' do
+    before :each do
+      user = create(:user)
+      list = create(:list, user: user)
+      5.times { create(:task, list: list) }
+
+      get :show, id: list.id
+    end
+
+    it 'returns all tasks in the current list' do
+      task_count = json_response.length
+      expect(task_count).to eq(5)
+    end
+
+    it { should respond_with 200 }
+  end
 end

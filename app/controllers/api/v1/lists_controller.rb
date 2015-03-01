@@ -4,4 +4,9 @@ class Api::V1::ListsController < ApplicationController
   def index
     render json: current_user.lists, status: 200
   end
+
+  def show
+    list = List.find(params[:id])
+    render json: list.tasks, status: 200
+  end
 end
