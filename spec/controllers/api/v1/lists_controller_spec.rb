@@ -36,4 +36,21 @@ describe Api::V1::ListsController do
 
     it { should respond_with 200 }
   end
+
+  describe 'DELETE #destroy' do
+    before :each do
+      @list = create(:list)
+      3.times { create(:task, list: @list) }
+    end
+
+    it 'removes the list and its associated tasks' do
+      expect {
+        delete :destroy, id: @list.id
+      }.to change(List, :count).by(-1)
+
+      expect(Task.where("list_id = ?", @list.id)).to be_empty
+
+      expect(response).to have_http_status(204)
+    end
+  end
 end
