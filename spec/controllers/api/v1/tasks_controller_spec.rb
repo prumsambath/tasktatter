@@ -1,16 +1,34 @@
 require 'rails_helper'
 
 describe Api::V1::TasksController do
-  describe 'GET #create' do
-    it 'saves the new task to the database' do
-      list = create(:list)
-      task_attributes = { "task" => attributes_for(:task), "list_id" => list.id }
+  context 'when is successfully created' do
+    describe 'GET #create' do
+      it 'saves the new task to the database' do
+        list = create(:list)
+        task_attributes = { "task" => attributes_for(:task), "list_id" => list.id }
 
-      expect {
+        expect {
+          post :create, task_attributes
+        }.to change(Task, :count).by(1)
+
+        expect(response).to have_http_status(201)
+      end
+    end
+  end
+
+  context 'when is not created' do
+    describe 'GET #created' do
+      before :each do
+        task_attributes = { task: { title: '' }, list_id: create(:list) }
+
         post :create, task_attributes
-      }.to change(Task, :count).by(1)
+      end
 
-      expect(response).to have_http_status(201)
+      it 'renders an errors json' do
+        expect(json_response[:title]).to include("can't be blank")
+      end
+
+      it { should respond_with 422 }
     end
   end
 

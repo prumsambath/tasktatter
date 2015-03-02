@@ -3,9 +3,12 @@ class Api::V1::TasksController < ApplicationController
 
   def create
     list = List.find(params[:list_id])
-    list.tasks.build(task_params)
-    list.save
-    render json: list.tasks, status: 201
+    task = list.tasks.build(task_params)
+    if list.save
+      render json: list.tasks, status: 201
+    else
+      render json: task.errors, status: 422
+    end
   end
 
   def update
