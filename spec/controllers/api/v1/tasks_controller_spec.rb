@@ -13,4 +13,20 @@ describe Api::V1::TasksController do
       expect(response).to have_http_status(201)
     end
   end
+
+  describe 'PATCH #update' do
+    before :each do
+      @task = create(:task, completed: false)
+
+      patch :update, { id: @task.id, task: { completed: true }, list_id: @task.list.id }
+
+      @task.reload
+    end
+
+    it 'changes the task to be complete' do
+      expect(@task.completed).to eq(true)
+    end
+
+    it { should respond_with 200 }
+  end
 end
