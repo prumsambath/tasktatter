@@ -56,6 +56,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
     context 'when is successfully updated' do
       before :each do
         @user = create(:user)
+        request.headers['Authorization'] = @user.auth_token
         @new_email = 'newemail@example.com'
         patch :update, { id: @user.id, user: { email: @new_email } }
       end
@@ -71,6 +72,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
     context 'when is not updated' do
       before :each do
         @user = create(:user)
+        request.headers['Authorization'] = @user.auth_token
         patch :update, { id: @user.id, user: { email: 'bademail.com' } }
       end
 
