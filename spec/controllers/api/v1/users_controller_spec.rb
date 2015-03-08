@@ -4,34 +4,40 @@ RSpec.describe Api::V1::UsersController, type: :controller do
   describe 'GET #show' do
     before :each do
       @user = create(:user)
+
+      api_authorization_header @user.auth_token
       get :show, id: @user.id, format: :json
     end
 
     it 'returns the information of the user' do
-      user_response = json_response
-      expect(user_response[:email]).to eq(@user.email)
+      expect(json_response[:email]).to eq(@user.email)
     end
 
-    it { should respond_with 200 }
+    it { should respond_with :ok }
   end
 
   describe 'GET #create' do
     context 'when is successfully created' do
       before :each do
+        user = create(:user)
+        api_authorization_header user.auth_token
+
         @user_attributes = attributes_for :user
         post :create, { user: @user_attributes }
       end
 
       it 'renders the json representation of the user record created' do
-        user_response = json_response
-        expect(user_response[:email]).to eq(@user_attributes[:email])
+        expect(json_response[:email]).to eq(@user_attributes[:email])
       end
 
-      it { should respond_with 201 }
+      it { should respond_with :created }
     end
 
     context 'when is not created' do
       before :each do
+        user = create(:user)
+        api_authorization_header user.auth_token
+
         invalid_user_attributes = { password: 'helloworld',
                                     password_confirmation: 'helloworld'
                                    }
@@ -39,16 +45,14 @@ RSpec.describe Api::V1::UsersController, type: :controller do
       end
 
       it 'renders an errors json' do
-        user_response = json_response
-        expect(user_response).to have_key(:errors)
+        expect(json_response).to have_key(:errors)
       end
 
       it 'renders the json errors' do
-        user_response = json_response
-        expect(user_response[:errors][:email]).to include("can't be blank")
+        expect(json_response[:errors][:email]).to include("can't be blank")
       end
 
-      it { respond_with 422 }
+      it { respond_with :unprocessable_entity }
     end
   end
 
@@ -62,11 +66,10 @@ RSpec.describe Api::V1::UsersController, type: :controller do
       end
 
       it 'renders the json representation of the updated user' do
-        user_response = json_response
-        expect(user_response[:email]).to eq(@new_email)
+        expect(json_response[:email]).to eq(@new_email)
       end
 
-      it { should respond_with 200 }
+      it { should respond_with :ok }
     end
 
     context 'when is not updated' do
@@ -77,16 +80,14 @@ RSpec.describe Api::V1::UsersController, type: :controller do
       end
 
       it 'renders an errors json' do
-        user_response = json_response
-        expect(user_response).to have_key(:errors)
+        expect(json_response).to have_key(:errors)
       end
 
       it 'renders the json errors' do
-        user_response = json_response
-        expect(user_response[:errors][:email]).to include('is invalid')
+        expect(json_response[:errors][:email]).to include('is invalid')
       end
 
-      it { respond_with 422 }
+      it { respond_with :unprocessable_entity }
     end
   end
 
@@ -97,6 +98,6 @@ RSpec.describe Api::V1::UsersController, type: :controller do
       delete :destroy, { id: user.id }
     end
 
-    it { should respond_with 204 }
+    it { should respond_with :no_content }
   end
 end
