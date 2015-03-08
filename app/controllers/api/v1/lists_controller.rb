@@ -5,17 +5,17 @@ class Api::V1::ListsController < ApplicationController
   respond_to :json
 
   def index
-    render json: current_user.lists, status: 200
+    render json: current_user.lists, status: :ok
   end
 
   def show
     list = List.find(params[:id])
-    render json: list.tasks, status: 200
+    render json: list.tasks, status: :ok
   end
 
   def destroy
     list = List.find(params[:id])
     list.destroy
-    head 204
+    head :no_content
   end
 end

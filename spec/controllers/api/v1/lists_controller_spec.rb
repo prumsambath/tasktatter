@@ -4,11 +4,10 @@ describe Api::V1::ListsController do
   describe 'GET #index' do
     before :each do
       user = create(:user)
-      sign_in user
-
       @list1 = create(:list, user: user)
       @list2 = create(:list, user: user)
 
+      api_authorization_header user.auth_token
       get :index
     end
 
@@ -17,7 +16,7 @@ describe Api::V1::ListsController do
       expect(list_titles).to match_array([@list1.title, @list2.title])
     end
 
-    it { should respond_with 200 }
+    it { should respond_with :ok }
   end
 
   describe 'GET #show' do
@@ -26,6 +25,7 @@ describe Api::V1::ListsController do
       list = create(:list, user: user)
       5.times { create(:task, list: list) }
 
+      api_authorization_header user.auth_token
       get :show, id: list.id
     end
 
@@ -34,12 +34,14 @@ describe Api::V1::ListsController do
       expect(task_count).to eq(5)
     end
 
-    it { should respond_with 200 }
+    it { should respond_with :ok }
   end
 
   describe 'DELETE #destroy' do
     before :each do
-      @list = create(:list)
+      user = create(:user)
+      api_authorization_header user.auth_token
+      @list = create(:list, user: user)
       3.times { create(:task, list: @list) }
     end
 
@@ -47,10 +49,16 @@ describe Api::V1::ListsController do
       expect {
         delete :destroy, id: @list.id
       }.to change(List, :count).by(-1)
+    end
 
+    it 'removes all associated tasks' do
+      delete :destroy, id: @list.id
       expect(Task.where("list_id = ?", @list.id)).to be_empty
+    end
 
-      expect(response).to have_http_status(204)
+    it 'returns http status code :no_content' do
+      delete :destroy, id: @list.id
+      expect(response).to have_http_status(:no_content)
     end
   end
 end
