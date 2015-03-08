@@ -1,4 +1,7 @@
 class Api::V1::ListsController < ApplicationController
+  include Authenticable
+
+  before_action :authenticate_with_token!
   respond_to :json
 
   def index
