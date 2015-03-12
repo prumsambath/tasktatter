@@ -84,31 +84,31 @@ describe Api::V1::ListsController do
       end
     end
 
-    it "allows other user to view the list if its permission is viewable" do
-      john = create(:user)
-      list = create(:list, user: john, permission: :viewable)
+    describe 'view a list' do
+      before :each do
+        jane = create(:user)
+        api_authorization_header jane.auth_token
+      end
 
-      jane = create(:user)
-      api_authorization_header jane.auth_token
+      it "allows other user to view the list if its permission is viewable" do
+        list = create(:list, permission: 'viewable')
 
-      get :show, id: list
+        get :show, id: list
 
-      expect(json_response.length).to eq(list.tasks.count)
+        expect(json_response.length).to eq(list.tasks.count)
 
-      expect(response).to have_http_status(:ok)
-    end
+        expect(response).to have_http_status(:ok)
+      end
 
-    it "does not allow other user to view if its permissin is private" do
-      list = create(:list)
+      it "does not allow other user to view if its permissin is private" do
+        list = create(:list, permission: :private)
 
-      jane = create(:user)
-      api_authorization_header jane.auth_token
+        get :show, id: list
 
-      get :show, id: list
+        expect(json_response).to have_key(:errors)
 
-      expect(json_response).to have_key(:errors)
-
-      expect(response).to have_http_status(:not_found)
+        expect(response).to have_http_status(:not_found)
+      end
     end
   end
 end
