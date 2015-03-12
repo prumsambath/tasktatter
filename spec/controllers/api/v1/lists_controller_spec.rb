@@ -99,5 +99,18 @@ describe Api::V1::ListsController do
 
       expect(response).to have_http_status(:ok)
     end
+
+    it "does not allow other user to view if its permissin is private" do
+      list = create(:list)
+
+      jane = create(:user)
+      api_authorization_header jane.auth_token
+
+      get :show, id: list
+
+      expect(json_response).to have_key(:errors)
+
+      expect(response).to have_http_status(:not_found)
+    end
   end
 end
