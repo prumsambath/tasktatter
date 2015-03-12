@@ -9,13 +9,32 @@ class Api::V1::ListsController < ApplicationController
   end
 
   def show
-    list = current_user.lists.find(params[:id])
-    render json: list.tasks, status: :ok
+    list = List.find(params[:id])
+    if list.user == current_user || !list.private
+      render json: list.tasks, status: :ok
+    else
+      render json: { errors: 'Resource not found' }, status: :not_found
+    end
   end
 
   def destroy
     list = current_user.lists.find(params[:id])
     list.destroy
     head :no_content
+  end
+
+  def update
+    list = current_user.lists.find(params[:id])
+    if list.update(list_params)
+      render json: list, status: :ok
+    else
+      render json: list.errors, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def list_params
+    params.require(:list).permit(:permission)
   end
 end
