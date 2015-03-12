@@ -62,28 +62,26 @@ describe Api::V1::ListsController do
     end
   end
 
-  describe 'permission' do
-    it 'changes the permission of the list' do
-      user = create(:user)
-      list = create(:list, permission: :private, user: user)
+  context 'permission' do
+    describe "change a list's permission" do
+      before :each do
+        @list = create(:list)
 
-      api_authorization_header user.auth_token
+        api_authorization_header @list.user.auth_token
+      end
 
-      patch :update, { id: list.id, list: { permission: :viewable } }
+      it 'changes the permission of the list when the permission is correct' do
+        patch :update, { id: @list.id, list: { permission: :viewable } }
 
-      list.reload
-      expect(list.permission.to_sym).to eq(:viewable)
-    end
+        @list.reload
+        expect(@list.permission.to_sym).to eq(:viewable)
+      end
 
-    it "does not change the permission if it's not the right permission" do
-      user = create(:user)
-      list = create(:list, user: user)
+      it 'does not change the permission when the permission is not correct' do
+        patch :update, { id: @list.id, list: { permission: :not_exist } }
 
-      api_authorization_header user.auth_token
-
-      patch :update, { id: list.id, list: { permission: :not_exist } }
-
-      expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
     end
 
     it "allows other user to view the list if its permission is viewable" do
