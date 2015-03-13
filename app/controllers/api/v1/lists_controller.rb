@@ -10,7 +10,7 @@ class Api::V1::ListsController < ApplicationController
 
   def show
     list = List.find(params[:id])
-    if list.user == current_user || !list.private
+    if list.can_be_viewed_by?(current_user)
       render json: list.tasks, status: :ok
     else
       render json: { errors: 'Resource not found' }, status: :not_found
