@@ -32,9 +32,20 @@ class Api::V1::ListsController < ApplicationController
     end
   end
 
+  def create
+    list = List.new(list_params)
+    list.user = current_user
+    p list.valid?
+    if list.save
+      render json: current_user.lists, status: :created
+    else
+      render json: list.errors, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def list_params
-    params.require(:list).permit(:permission)
+    params.require(:list).permit(:title, :permission)
   end
 end

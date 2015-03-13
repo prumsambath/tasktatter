@@ -37,6 +37,21 @@ describe Api::V1::ListsController do
     it { should respond_with :ok }
   end
 
+  describe 'POST #create' do
+    it 'adds a new list' do
+      user = create(:user)
+      params = { list: attributes_for(:list), user_id: user.id }
+
+      api_authorization_header user.auth_token
+
+      expect {
+        post :create, params
+      }.to change(List, :count).by(1)
+
+      expect(response).to have_http_status(:created)
+    end
+  end
+
   describe 'DELETE #destroy' do
     before :each do
       user = create(:user)
