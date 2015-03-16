@@ -8,15 +8,6 @@ class Api::V1::UsersController < ApplicationController
     respond_with User.find(params[:id])
   end
 
-  def create
-    user = User.new(user_params)
-    if user.save
-      render json: user, status: :created
-    else
-      render json: { errors: user.errors }, status: :unprocessable_entity
-    end
-  end
-
   def update
     user = current_user
     if user.update(user_params)
@@ -26,14 +17,9 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
-  def destroy
-    current_user.destroy
-    head :no_content
-  end
-
   private
 
   def user_params
-    params.require(:user).permit(:email, :password, :password_confirmation)
+    params.require(:user).permit(:email)
   end
 end
