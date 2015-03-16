@@ -5,18 +5,18 @@ class List < ActiveRecord::Base
   validates :permission, inclusion: { in: ['private', 'viewable', 'open'].freeze }
 
   def can_be_viewed_by?(user)
-    self.user == user || !self.private
+    (self.user == user) || !self.is_private?
   end
 
-  def private
+  def is_private?
     self.permission == 'private'
   end
 
-  def viewable
+  def is_viewable?
     self.permission == 'viewable'
   end
 
-  def open
+  def is_open?
     self.permission == 'open'
   end
 end
