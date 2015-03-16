@@ -7,8 +7,7 @@ describe Api::V1::ListsController do
       @list1 = create(:list, user: user)
       @list2 = create(:list, user: user)
 
-      api_authorization_header user.auth_token
-      get :index
+      get :index, { auth_token: user.auth_token }
     end
 
     it "returns the user's lists" do
@@ -25,8 +24,7 @@ describe Api::V1::ListsController do
       list = create(:list, user: user)
       5.times { create(:task, list: list) }
 
-      api_authorization_header user.auth_token
-      get :show, id: list.id
+      get :show, { id: list.id, auth_token: user.auth_token }
     end
 
     it 'returns all tasks in the current list' do
@@ -40,9 +38,8 @@ describe Api::V1::ListsController do
   describe 'POST #create' do
     it 'adds a new list' do
       user = create(:user)
-      params = { list: attributes_for(:list), user_id: user.id }
-
-      api_authorization_header user.auth_token
+      list_attributes = { list: attributes_for(:list), user_id: user.id }
+      params = list_attributes.merge(auth_token: user.auth_token)
 
       expect {
         post :create, params
@@ -54,25 +51,24 @@ describe Api::V1::ListsController do
 
   describe 'DELETE #destroy' do
     before :each do
-      user = create(:user)
-      api_authorization_header user.auth_token
-      @list = create(:list, user: user)
+      @user = create(:user)
+      @list = create(:list, user: @user)
       3.times { create(:task, list: @list) }
     end
 
     it 'removes the list and its associated tasks' do
       expect {
-        delete :destroy, id: @list.id
+        delete :destroy, { id: @list.id, auth_token: @user.auth_token }
       }.to change(List, :count).by(-1)
     end
 
     it 'removes all associated tasks' do
-      delete :destroy, id: @list.id
+      delete :destroy,{ id: @list.id, auth_token: @user.auth_token }
       expect(Task.where("list_id = ?", @list.id)).to be_empty
     end
 
     it 'returns http status code :no_content' do
-      delete :destroy, id: @list.id
+      delete :destroy, { id: @list.id, auth_token: @user.auth_token }
       expect(response).to have_http_status(:no_content)
     end
   end
@@ -81,19 +77,17 @@ describe Api::V1::ListsController do
     describe "change a list's permission" do
       before :each do
         @list = create(:list)
-
-        api_authorization_header @list.user.auth_token
       end
 
       it 'changes the permission of the list when the permission is correct' do
-        patch :update, { id: @list.id, list: { permission: :viewable } }
+        patch :update, { id: @list.id, list: { permission: :viewable }, auth_token: @list.user.auth_token }
 
         @list.reload
         expect(@list.permission.to_sym).to eq(:viewable)
       end
 
       it 'does not change the permission when the permission is not correct' do
-        patch :update, { id: @list.id, list: { permission: :not_exist } }
+        patch :update, { id: @list.id, list: { permission: :not_exist }, auth_token: @list.user.auth_token }
 
         expect(response).to have_http_status(:unprocessable_entity)
       end
@@ -101,14 +95,14 @@ describe Api::V1::ListsController do
 
     describe 'view a list' do
       before :each do
-        jane = create(:user)
-        api_authorization_header jane.auth_token
+        @john = create(:user)
+        @jane = create(:user)
       end
 
       it "allows other user to view the list if its permission is viewable" do
-        list = create(:list, permission: 'viewable')
+        list = create(:list, permission: 'viewable', user: @john)
 
-        get :show, id: list
+        get :show, { id: list, auth_token: @jane.auth_token }
 
         expect(json_response.length).to eq(list.tasks.count)
 
@@ -116,9 +110,9 @@ describe Api::V1::ListsController do
       end
 
       it "does not allow other user to view if its permissin is private" do
-        list = create(:list, permission: :private)
+        list = create(:list, permission: :private, user: @john)
 
-        get :show, id: list
+        get :show, { id: list, auth_token: @jane.auth_token }
 
         expect(json_response).to have_key(:errors)
 

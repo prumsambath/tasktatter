@@ -7,11 +7,10 @@ describe Api::V1::TasksController do
         user = create(:user)
         list = create(:list, user: user)
         task_attributes = { "task" => attributes_for(:task), "list_id" => list.id }
-
-        api_authorization_header user.auth_token
+        params = task_attributes.merge(auth_token: user.auth_token)
 
         expect {
-          post :create, task_attributes
+          post :create, params
         }.to change(Task, :count).by(1)
 
         expect(response).to have_http_status(:created)
@@ -24,9 +23,9 @@ describe Api::V1::TasksController do
       before :each do
         user = create(:user)
         task_attributes = { task: { title: '' }, list_id: create(:list) }
+        params = task_attributes.merge(auth_token: user.auth_token)
 
-        api_authorization_header user.auth_token
-        post :create, task_attributes
+        post :create, params
       end
 
       it 'renders an errors json' do
@@ -42,8 +41,10 @@ describe Api::V1::TasksController do
       user = create(:user)
       @task = create(:task, completed: false)
 
-      api_authorization_header user.auth_token
-      patch :update, { id: @task.id, task: { completed: true }, list_id: @task.list.id }
+      task_attributes = { id: @task.id, task: { completed: true }, list_id: @task.list.id }
+      params = task_attributes.merge(auth_token: user.auth_token)
+
+      patch :update, params
 
       @task.reload
     end

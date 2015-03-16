@@ -5,8 +5,7 @@ RSpec.describe Api::V1::UsersController, type: :controller do
     before :each do
       @user = create(:user)
 
-      api_authorization_header @user.auth_token
-      get :show, id: @user.id, format: :json
+      get :show, { id: @user.id, auth_token: @user.auth_token }, format: :json
     end
 
     it 'returns the information of the user' do
@@ -20,9 +19,9 @@ RSpec.describe Api::V1::UsersController, type: :controller do
     context 'when is successfully updated' do
       before :each do
         @user = create(:user)
-        api_authorization_header @user.auth_token
         @new_email = 'newemail@example.com'
-        patch :update, { id: @user.id, user: { email: @new_email } }
+
+        patch :update, { id: @user.id, user: { email: @new_email }, auth_token: @user.auth_token }
       end
 
       it 'renders the json representation of the updated user' do
@@ -35,8 +34,8 @@ RSpec.describe Api::V1::UsersController, type: :controller do
     context 'when is not updated' do
       before :each do
         @user = create(:user)
-        api_authorization_header @user.auth_token
-        patch :update, { id: @user.id, user: { email: 'bademail.com' } }
+
+        patch :update, { id: @user.id, user: { email: 'bademail.com' }, auth_token: @user.auth_token }
       end
 
       it 'renders an errors json' do
