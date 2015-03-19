@@ -8,6 +8,10 @@ class List < ActiveRecord::Base
     (self.user == user) || !self.is_private?
   end
 
+  def editable?(user)
+    self.user == user || self.is_open?
+  end
+
   def is_private?
     self.permission == 'private'
   end

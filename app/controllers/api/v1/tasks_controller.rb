@@ -7,7 +7,8 @@ class Api::V1::TasksController < ApplicationController
   def create
     list = List.find(params[:list_id])
     task = list.tasks.build(task_params)
-    if list.save
+
+    if list.editable?(current_user) && list.save
       render json: list.tasks, status: :created
     else
       render json: task.errors, status: :unprocessable_entity
