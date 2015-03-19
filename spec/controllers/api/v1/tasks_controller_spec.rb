@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe Api::V1::TasksController do
   context 'when is successfully created' do
-    describe 'GET #create' do
+    describe 'POST #create' do
       it 'saves the new task to the database' do
         user = create(:user)
         list = create(:list, user: user)
@@ -19,7 +19,7 @@ describe Api::V1::TasksController do
   end
 
   context 'when is not created' do
-    describe 'GET #created' do
+    describe 'POST #created' do
       before :each do
         user = create(:user)
         task_attributes = { task: { title: '' }, list_id: create(:list) }
