@@ -18,7 +18,8 @@ class Api::V1::TasksController < ApplicationController
   def update
     list = List.find(params[:list_id])
     task = Task.find(params[:id])
-    if task.update_attributes(task_params)
+
+    if list.editable?(current_user) && task.update_attributes(task_params)
       render json: list.tasks, status: :ok
     else
       render json: task.errors, status: :unprocessable_entity
